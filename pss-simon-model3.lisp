@@ -4,9 +4,11 @@
 ;;; main idea, same as Lovett's NJAMOS
 ;;; Selective attention is competition among productions.
 
+;;; This version of the model produced
+
 (clear-all)
 
-(define-model pssimon
+(define-model pss-simon3
 
 (sgp :er t
      :act nil
@@ -20,8 +22,8 @@
      :egs 0.1
      :reward-hook bg-reward-hook
      :alpha 0.01
-     :imaginal-activation 1.0
-     :visual-activation 2.0)
+     :imaginal-activation 3.0
+     :visual-activation 1.0)
 
 (chunk-type (simon-stimulus (:include visual-object))
 	    kind shape color position)
@@ -36,7 +38,10 @@
 
 (chunk-type compatible-response has-motor-response hand position)
 
-(chunk-type wm kind value dimension rule)
+(chunk-type hand-response kind hand) 
+
+
+(chunk-type wm state value dimension irrelevant checked)
 
 (add-dm (simon-rule isa chunk)
 	(simon-stimulus isa chunk)
@@ -53,7 +58,9 @@
 	(yes isa chunk)
 	(no isa chunk)
 	(proceed isa chunk)
-	
+	(process isa chunk)
+	(hand-response isa chunk)
+	(blocked isa chunk)
 	(circle-left isa simon-rule
 		     kind simon-rule
 		     has-motor-response yes
@@ -78,6 +85,15 @@
 				  hand left
 				  position left)
 
+	(respond-right-hand isa hand-response
+			    kind hand-response
+			    hand right)
+
+	(respond-left-hand isa hand-response
+			   kind hand-response
+			   hand left)
+
+
 	(stimulus1 isa simon-stimulus
 		   shape circle
 		   position right
@@ -85,13 +101,15 @@
 		   kind simon-stimulus)
 
 	(wm1 isa wm
-	     kind proceed)
+	     state proceed)
 )
 
 (p find-screen
+   "Look at the screen (if you were not already looking at it)"
    ?visual>
      buffer empty
      state free
+     
    ?visual-location>
      buffer empty
      state free
@@ -101,142 +119,209 @@
 )  
 
 (p prepare-wm
+   "If there are no contents in WM, prepare contents"
    ?imaginal>
      buffer empty
      state free
+
+   ?manual>
+     preparation free
+     processor free
+     execution free  
 ==>
    +imaginal>
      isa wm
-     kind proceed
-     dimension shape
-)  
+     state process
+     checked no
+)
 
 
 (p process-shape
    =visual>
      kind simon-stimulus
-     shape =SHAPE 
+     shape =SHAPE
+     
    =imaginal>
-     kind proceed
-     ;;value nil 
- ==>
-   =visual>    
+     state process
+     dimension nil
+
+   ?retrieval>
+     state free
+     buffer empty
+
+==>
+   =visual>
    =imaginal>
-     dimension shape
-     kind done
-     ;value =SHAPE
+     dimension =SHAPE
 )
 
 (p dont-process-shape
    =visual>
      kind simon-stimulus
-     shape =SHAPE
-     ;;position =POS
+     position =POS
+     
    =imaginal>
-     kind proceed
-     ;;value nil 
- ==>
-   =visual>    
-   =imaginal>
-     kind done
-     ;dimension position
-     ;;value =POS
-     ;value zeta
-)
+     state process
+     dimension nil
 
+   ?retrieval>
+     state free
+     buffer empty
+
+==>
+   =visual>
+   =imaginal>
+     dimension =POS
+)
 
 (p process-position
    =visual>
      kind simon-stimulus
-     position =POS 
+     position =POS
+     
    =imaginal>
-     kind proceed
-     ;;value nil 
- ==>
-   =visual>    
+     state process
+     dimension nil
+
+   ?retrieval>
+     state free
+     buffer empty
+
+==>
+   =visual>
    =imaginal>
-     dimension position
-     kind done
-     ;value =POS
+     dimension =POS
 )
 
 (p dont-process-position
    =visual>
      kind simon-stimulus
-     position =POS
      shape =SHAPE
+     
    =imaginal>
-     kind proceed
-     ;;value nil 
- ==>
-   =visual>    
+     state process
+     dimension nil
+
+   ?retrieval>
+     state free
+     buffer empty
+
+==>
+   =visual>     
    =imaginal>
-     kind done
+     dimension =SHAPE
 )
 
-(p check
+
+(p retrieve-intended-response
+   "Retrieves the relevant part of the Simon Task rule"
+   =visual>
+     kind simon-stimulus
+     shape =SHAPE
+     
    =imaginal>
-     kind done
-   - dimension shape
-;   - value nil
+     state process
+   - dimension nil
+   
    ?retrieval>
+     state free
      buffer empty
+==>
+   =visual>   ; Keep visual
+   =imaginal> ; Keep WM
+   
+   +retrieval>
+     kind simon-rule
+     ;shape =SHAPE
+     has-motor-response yes
+)
+
+
+;;; Check
+;;; Last time to catch yourself making a mistake
+(p check-pass
+   =visual>
+     shape =SHAPE
+   
+   =retrieval>
+     kind  simon-rule
+     shape =SHAPE
+
+   =imaginal>
+     state process
+     checked no
+   
+   ?imaginal>
      state free
 ==>
+    !eval! (trigger-reward 1)
+    
+   =visual>
+   =retrieval>
    =imaginal>
-     dimension nil
-     kind proceed
-   !eval! (trigger-reward -1)
-)
+     checked yes
+ )
 
-(p find-response
+(p check-detect-problem
+   =visual>
+     shape =SHAPE
+   
+   =retrieval>
+     kind  simon-rule
+   - shape =SHAPE
+
    =imaginal>
-     kind done
-
-   ?retrieval>
-     buffer empty
+     state process
+     checked no
+   
+   ?imaginal>
      state free
  ==>
-   =imaginal>    
-   +retrieval>
-     has-motor-response yes
-)   
+   !eval! (trigger-reward -1)
+   =visual>
+   -retrieval>
+   =imaginal>
+     checked yes
+ )
 
+ 
 (p respond
+   "Puts the rule in WM"
+   =visual>
+     kind simon-stimulus
+     shape =SHAPE 
+
+   =imaginal>
+     state process
+     checked yes
+
    =retrieval>
+     kind simon-rule
      has-motor-response yes
      hand =HAND
-   =imaginal>
-    - dimension nil   
+     
    ?manual>
      preparation free
      processor free
      execution free
 ==>
+  -imaginal>
+  -retrieval>
   +manual>
      isa punch
      hand =HAND
      finger index
-)      
-
-
-
-(p done
-   =visual>
-      kind simon-screen
-      value done
-==>
-   !stop!
-)
 )
 
-(spp check :u 10 :fixed-utility t)
 
-(spp process-shape :at 0.150)
-(spp process-position :at 0.150)
+)  ;;; End of the model
+;(spp check :u 10 :fixed-utility t)
+
+;(spp process-shape :at 0.150)
+;(spp process-position :at 0.150)
 
 
-(defun simon-reload (&key (visicon t))
+(defun simon3-reload (&key (visicon t))
   (reload)
   (install-device (make-instance 'simon-task))
   (init (current-device))
