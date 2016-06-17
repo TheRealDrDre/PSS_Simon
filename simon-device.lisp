@@ -13,9 +13,9 @@
        (fboundp 'start-environment)))
 
 
-(defparameter *d1* 2)
+(defparameter *d1* 1)
 
-(defparameter *d2* 2)
+(defparameter *d2* 1)
 
 (defparameter *reward* 10)
 
@@ -39,9 +39,32 @@
 ;;    (spp ,production :u 14)
 ;;    nil))
 
-(defun simulate-d2 ()
+(defun simulate-d2 (n vals)
   " Generates a list of performances for varyig D2 values"
-  ())
+  (format t "~{~a~^, ~}~%" '("D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
+  (dolist (v vals)
+    (setf *d2* v)
+    (let* ((res (simulate n :verbose nil))
+	   (nums (mapcar #'float
+			 (cons v
+			       (apply #'append
+				      (mapcar #'rest res))))))
+      (format t "~{~4,f~^, ~}~%" nums))))
+
+(defun simulate-d1-d2 (n vals)
+  " Generates a list of performances for varying D1 and D2 values"
+  (format t "~{~a~^, ~}~%" '("D1" "D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
+  (dolist (v1 vals)
+    (dolist (v2 vals)
+      (setf *d1* v1)
+      (setf *d2* v2)
+      (let* ((res (simulate n :verbose nil))
+	     (nums (mapcar #'float
+			   (append (list v1 v2)
+				   (apply #'append
+					  (mapcar #'rest res))))))
+	(format t "~{~4,f~^, ~}~%" nums)))))
+
 
 (defun simulate (n &key (params nil) (verbose nil))
   (let ((results nil))
@@ -49,7 +72,8 @@
       ;(clear-all)
       ;(define-model pss-simon4)
       (simon4-reload :visicon nil)
-      (sgp-fct (mapcan #'(lambda (x) (list (first x) (rest x))) params))
+      (when params
+	(sgp-fct (mapcan #'(lambda (x) (list (first x) (rest x))) params)))
       (sgp :v nil
 	   :style-warnings nil
 	   :model-warnings nil)
@@ -446,7 +470,7 @@
 	 (cong-acc (apply #'mean (mapcar #'trial-accuracy cong)))
 	 (incong-acc (apply #'mean (mapcar #'trial-accuracy incong)))
 	 (cong-rt (apply #'mean (mapcar #'trial-rt cong)))
-	 (incong-rt (apply #'mean (mapcar #'trial-rt incong))))
+	 (incong-rt (apply #'mean (mapcar #'trial-rt (remove-if-not #'(lambda (x) (= (trial-accuracy x) 1)) incong)))))
     (list (list :congruent cong-acc cong-rt)
 	  (list :incongruent incong-acc incong-rt))))
        

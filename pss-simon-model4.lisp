@@ -13,17 +13,21 @@
 (sgp :er t
      :act nil
      :esc T
-     ;:ans 0.05
+     :ans 0.5
      :auto-attend T
-     ;:le 0.67
-     ;:lf 0.3
+     :le 0.67
+     :lf 0.3
      :mas 4.0
      :ul T
-     ;:egs 0.1
+     :egs 0.1
      :reward-hook bg-reward-hook
-     ;:alpha 0.01
-     ;:imaginal-activation 3.0
-     ;:visual-activation 1.0
+     :alpha 0.2
+     :imaginal-activation 3.0
+     :imaginal-delay 0.01
+     :visual-activation 2.0
+     :motor-burst-time 0.05
+     :motor-feature-prep-time 0.05    
+     :motor-initiation-time 0.01
 )
 
 (chunk-type (simon-stimulus (:include visual-object))
@@ -39,9 +43,15 @@
 
 (chunk-type compatible-response has-motor-response hand position)
 
-(chunk-type hand-response kind hand) 
+;(chunk-type hand-response kind hand) 
 
-(chunk-type wm state value1 value2 dimension irrelevant checked)
+(chunk-type wm
+	    state
+	    value1
+	    value2
+	    ;dimension
+	    ;irrelevant
+	    checked)
 
 (add-dm (simon-rule isa chunk)
 	(simon-stimulus isa chunk)
@@ -85,13 +95,13 @@
 				  hand left
 				  position left)
 
-	(respond-right-hand isa hand-response
-			    kind hand-response
-			    hand right)
+;	(respond-right-hand isa hand-response
+;			    kind hand-response
+;			    hand right)
 
-	(respond-left-hand isa hand-response
-			   kind hand-response
-			   hand left)
+;	(respond-left-hand isa hand-response
+;			   kind hand-response
+;			   hand left)
 
 
 	(stimulus1 isa simon-stimulus
@@ -171,7 +181,8 @@
 ==>
    =visual>
    =imaginal>
-     value1 =POS
+      value1 =POS
+   
 )
 
 (p process-position
@@ -255,12 +266,12 @@
    ?imaginal>
      state free
 ==>
-    !eval! (trigger-reward 1)
+   ; !eval! (trigger-reward 1)
     
    =visual>
-   -retrieval>
+   =retrieval>
    =imaginal>
-     value1 nil
+     ;value1 nil
      value2 nil
      checked yes
  )
@@ -280,10 +291,12 @@
    ?imaginal>
      state free
  ==>
-   !eval! (trigger-reward -1)
+   ;!eval! (trigger-reward -1)
    =visual>
    -retrieval>
    =imaginal>
+     value1 nil
+     value2 nil
      checked yes
  )
 
@@ -316,6 +329,8 @@
      finger index
 )
 
+;(spp check-pass :reward 1)
+(spp check-detect-problem :reward -1)
 
 )  ;;; End of the model
 ;(spp check :u 10 :fixed-utility t)
