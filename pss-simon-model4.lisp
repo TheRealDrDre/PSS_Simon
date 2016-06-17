@@ -21,7 +21,7 @@
      :ul T
      :egs 0.1
      :reward-hook bg-reward-hook
-     :alpha 0.2
+     :alpha 0.1
      :imaginal-activation 3.0
      :imaginal-delay 0.01
      :visual-activation 2.0
@@ -85,16 +85,16 @@
 		      shape square
 		      dimension shape)
 
-	(compatible-response-right isa compatible-response
-				   has-motor-response yes
-				   hand right
-				   position right)
-
-	(compatible-response-left isa compatible-response
-				  has-motor-response yes
-				  hand left
-				  position left)
-
+;	(compatible-response-right isa compatible-response
+;				   has-motor-response yes
+;				   hand right
+;				   position right)
+;
+;	(compatible-response-left isa compatible-response
+;				  has-motor-response yes
+;				  hand left
+;				  position left)
+;
 ;	(respond-right-hand isa hand-response
 ;			    kind hand-response
 ;			    hand right)
@@ -331,6 +331,8 @@
 
 ;(spp check-pass :reward 1)
 (spp check-detect-problem :reward -1)
+(spp process-shape :u 1); :fixed-utility t)
+(spp process-position :u 1); :fixed-utility t)
 
 )  ;;; End of the model
 ;(spp check :u 10 :fixed-utility t)
