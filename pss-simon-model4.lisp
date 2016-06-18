@@ -19,7 +19,7 @@
      :lf 0.3
      :mas 4.0
      :ul T
-     :egs 0.1
+     :egs 0.2
      :reward-hook bg-reward-hook
      :alpha 0.1
      :imaginal-activation 3.0
@@ -331,8 +331,8 @@
 
 ;(spp check-pass :reward 1)
 (spp check-detect-problem :reward -1)
-(spp process-shape :u 1); :fixed-utility t)
-(spp process-position :u 1); :fixed-utility t)
+(spp process-shape :u 1 :fixed-utility t)
+(spp process-position :u 0.7 :fixed-utility t)
 
 )  ;;; End of the model
 ;(spp check :u 10 :fixed-utility t)
