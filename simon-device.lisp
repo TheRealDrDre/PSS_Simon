@@ -39,9 +39,9 @@
 ;;    (spp ,production :u 14)
 ;;    nil))
 
-(defun simulate-d2 (n vals)
+(defun simulate-d2 (n vals &key (out t) (report t))
   " Generates a list of performances for varyig D2 values"
-  (format t "~{~a~^, ~}~%" '("D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
+  (format out "~{~a~^, ~}~%" '("D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
   (dolist (v vals)
     (setf *d2* v)
     (let* ((res (simulate n :verbose nil))
@@ -49,28 +49,30 @@
 			 (cons v
 			       (apply #'append
 				      (mapcar #'rest res))))))
-      (format t "~{~4,f~^, ~}~%" nums))))
+      (format out "~{~4,f~^, ~}~%" nums))))
 
-(defun simulate-d1-d2 (n vals)
+(defun simulate-d1-d2 (n vals &key (out t) (report t))
   " Generates a list of performances for varying D1 and D2 values"
-  (format t "~{~a~^, ~}~%" '("D1" "D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
+  (format out "~{~a~^, ~}~%" '("D1" "D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
   (dolist (v1 vals)
     (dolist (v2 vals)
       (setf *d1* v1)
       (setf *d2* v2)
-      (let* ((res (simulate n :verbose nil))
-	     (nums (mapcar #'float
-			   (append (list v1 v2)
-				   (apply #'append
-					  (mapcar #'rest res))))))
-	(format t "~{~4,f~^, ~}~%" nums)))))
+      (let* ((results (simulate n 
+				:verbose nil 
+				:report report)))
+	(dolist (res results)
+	  (let ((nums (mapcar #'float
+			      (append (list v1 v2)
+				      (apply #'append
+					     (mapcar #'rest res))))))
+	    (format out "~{~4,f~^, ~}~%" nums)))))))
 
 
-(defun simulate (n &key (params nil) (verbose nil))
+(defun simulate (n &key (params nil) (verbose nil) (report t))
+  "Simulates N runs of the model, and returns the results either as a list or as a synthetic report"
   (let ((results nil))
     (dotimes (i n (average-results results))
-      ;(clear-all)
-      ;(define-model pss-simon4)
       (simon4-reload :visicon nil)
       (when params
 	(sgp-fct (mapcan #'(lambda (x) (list (first x) (rest x))) params)))
@@ -93,22 +95,18 @@
 	      (dotimes (i 17)
 		(write-char #\backspace)))))
       (push (analyze-log (experiment-log (current-device)))
-	    results)
-      )))
+	    results))
+    (if report
+	(List (average-results results))
+	results)))
 
-(defun average-results (lst)
-  (list (list :congruent
-	      (float (apply 'mean (mapcar #'(lambda (x) (second (first x)))
-					  lst)))
-	      (apply 'mean (mapcar #'(lambda (x) (third (first x)))
-				   lst)))
-	(list :incongruent
-	      (float (apply 'mean (mapcar #'(lambda (x) (second (second x)))
-					  lst)))
-	      (apply 'mean (mapcar #'(lambda (x) (third (second x)))
-				   lst)))
-	      
-	      ))
+(defun result? (lst)
+  "Checks whether a lst is a summary of a run's results"
+  (and (= (length lst) 2)
+       (every #'keywordp (mapcar #'first lst)))
+       (every #'numberp (mapcar #'second lst))
+       (every #'numberp (mapcar #'third lst)))
+
 
 (defun incremental-average-results (avg current n)
   (if (null avg)
