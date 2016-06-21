@@ -3,12 +3,18 @@
 
 ;;; main idea, same as Lovett's NJAMOS
 ;;; Selective attention is competition among productions.
-
-;;; This version of the model produced
+;;; ================================================================
+;;; SIMON TASK MODEL
+;;; ================================================================
+;;; (c) 2016, Andrea Stocco, University of Washington
+;;;           stocco@uw.edu
+;;; ================================================================
+;;; This is an ACT-R model of the Simon task.
+;;; ================================================================
 
 (clear-all)
 
-(define-model pss-simon4
+(define-model competitive-simon
 
 (sgp :er t
      :act nil
@@ -49,8 +55,6 @@
 	    state
 	    value1
 	    value2
-	    ;dimension
-	    ;irrelevant
 	    checked)
 
 (add-dm (simon-rule isa chunk)
@@ -84,25 +88,6 @@
 		      hand right
 		      shape square
 		      dimension shape)
-
-;	(compatible-response-right isa compatible-response
-;				   has-motor-response yes
-;				   hand right
-;				   position right)
-;
-;	(compatible-response-left isa compatible-response
-;				  has-motor-response yes
-;				  hand left
-;				  position left)
-;
-;	(respond-right-hand isa hand-response
-;			    kind hand-response
-;			    hand right)
-
-;	(respond-left-hand isa hand-response
-;			   kind hand-response
-;			   hand left)
-
 
 	(stimulus1 isa simon-stimulus
 		   shape circle
@@ -145,8 +130,15 @@
      checked no
 )
 
+;;; ----------------------------------------------------------------
+;;; SELECTIVE ATTENTION
+;;; ----------------------------------------------------------------
+;;; These production compete for attention to shape and position of
+;;; the stimulus
+;;; ----------------------------------------------------------------
 
 (p process-shape
+   "Encodes the shape in WM"
    =visual>
      kind simon-stimulus
      shape =SHAPE
@@ -166,6 +158,7 @@
 )
 
 (p dont-process-shape
+   "Does not encode the shape (focuses on position as a side effect)"
    =visual>
      kind simon-stimulus
      position =POS
@@ -186,6 +179,7 @@
 )
 
 (p process-position
+   "Encodes the stimulus position in WM"
    =visual>
      kind simon-stimulus
      position =POS
@@ -205,6 +199,7 @@
 )
 
 (p dont-process-position
+   "Does not encode the position (focuses on the shape as a side effect"
    =visual>
      kind simon-stimulus
      shape =SHAPE
@@ -223,6 +218,13 @@
      value2 =SHAPE
 )
 
+;;; ----------------------------------------------------------------
+;;; RESPONSE AND CHECK
+;;; ----------------------------------------------------------------
+;;; The more responds by harvesting the most active Simon rule.
+;;; Thus, response is guided by spreading activation from WM.
+;;; A one-time check routine is also granted.
+;;; ----------------------------------------------------------------
 
 (p retrieve-intended-response
    "Retrieves the relevant part of the Simon Task rule"
@@ -252,6 +254,7 @@
 ;;; Check
 ;;; Last time to catch yourself making a mistake
 (p check-pass
+   "Makes sure the response is compatible with the rules"
    =visual>
      shape =SHAPE
    
@@ -266,17 +269,15 @@
    ?imaginal>
      state free
 ==>
-   ; !eval! (trigger-reward 1)
-    
    =visual>
    =retrieval>
    =imaginal>
-     ;value1 nil
      value2 nil
      checked yes
  )
 
 (p check-detect-problem
+   "If there is a problem, redo the retrieval once"
    =visual>
      shape =SHAPE
    
@@ -291,7 +292,6 @@
    ?imaginal>
      state free
  ==>
-   ;!eval! (trigger-reward -1)
    =visual>
    -retrieval>
    =imaginal>
@@ -302,7 +302,7 @@
 
  
 (p respond
-   "Puts the rule in WM"
+   "If we have a response and it has been check, we respond"
    =visual>
      kind simon-stimulus
      shape =SHAPE 
@@ -335,15 +335,9 @@
 (spp process-position :u 0.7 :fixed-utility t)
 
 )  ;;; End of the model
-;(spp check :u 10 :fixed-utility t)
-
-;(spp process-shape :at 0.150)
-;(spp process-position :at 0.150)
-
 
 (defun simon4-reload (&key (visicon t))
   (reload)
-  ;(load "pss-simon-model4.lisp")
   (install-device (make-instance 'simon-task))
   (init (current-device))
   (proc-display)
