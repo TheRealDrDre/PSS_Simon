@@ -1,15 +1,19 @@
-;;; PSS _ SImon task
-
-
-;;; main idea, same as Lovett's NJAMOS
-;;; Selective attention is competition among productions.
 ;;; ================================================================
 ;;; SIMON TASK MODEL
 ;;; ================================================================
 ;;; (c) 2016, Andrea Stocco, University of Washington
 ;;;           stocco@uw.edu
 ;;; ================================================================
-;;; This is an ACT-R model of the Simon task.
+;;; This is an ACT-R model of the Simon task. It is based on ideas
+;;; heavily borrowed from Marsha Lovett's (2005) NJAMOS model of
+;;; the Stroop task. It also explcitly models the competition
+;;; between direct and indirect pathways of the basal ganglia as two
+;;; separate set of rules, "process" and "dont-process" rules. In
+;;; turn, this idea is borrowed from my model of Frank's (2004)
+;;; Probabilistic Stimulus Selection Task. The same result
+;;; could possibily be achieved through other means, but this
+;;; solution is simple, intutitive, and permits to model competitive
+;;; dynamics of the BG without changing ACT-R.
 ;;; ================================================================
 
 (clear-all)
@@ -49,9 +53,8 @@
 
 (chunk-type compatible-response has-motor-response hand position)
 
-;(chunk-type hand-response kind hand) 
 
-(chunk-type wm
+(chunk-type wm       ;; Working Memory. Simple imagine chuink with 2 slots
 	    state
 	    value1
 	    value2
@@ -61,20 +64,14 @@
 	(simon-stimulus isa chunk)
 	(simon-screen isa chunk)
 	(stimulus isa chunk)
-	(done isa chunk)
-	(pause isa chunk)
 	(circle isa chunk)
 	(square isa chunk)
 	(shape isa chunk)
-	(not-shape isa chunk)
-	(position isa chunk)
-	(not-position isa chunk)
 	(yes isa chunk)
 	(no isa chunk)
 	(proceed isa chunk)
 	(process isa chunk)
-	(hand-response isa chunk)
-	(blocked isa chunk)
+
 	(circle-left isa simon-rule
 		     kind simon-rule
 		     has-motor-response yes
@@ -88,15 +85,6 @@
 		      hand right
 		      shape square
 		      dimension shape)
-
-	(stimulus1 isa simon-stimulus
-		   shape circle
-		   position right
-		   color black
-		   kind simon-stimulus)
-
-	(wm1 isa wm
-	     state proceed)
 )
 
 (p find-screen
