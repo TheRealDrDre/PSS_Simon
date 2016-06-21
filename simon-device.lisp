@@ -2,16 +2,20 @@
 ;;; SIMON-DEVICE.LISP
 ;;; ------------------------------------------------------------------
 ;;; A class that provide an ACT-R GUI interface for a modified
-;;; version of the Simon Task
+;;; version of the Simon Task.
 ;;; ------------------------------------------------------------------
 
+
 (defparameter *using-swank* t)
+
+;;; ----------------------------------------------------------------
+;;; ACT-R Functions
+;;; ----------------------------------------------------------------
 
 (defun act-r-loaded? ()
   "Cheap hack to check whether ACTR is loaded"
   (and (fboundp 'run-n-events)
        (fboundp 'start-environment)))
-
 
 (defparameter *d1* 1)
 
@@ -38,6 +42,10 @@
 ;;	 (start (subseq pname 0 4)))
 ;;    (spp ,production :u 14)
 ;;    nil))
+
+;;; ----------------------------------------------------------------
+;;; Running simulations
+;;; ----------------------------------------------------------------
 
 (defun simulate-d2 (n vals &key (out t) (report t))
   " Generates a list of performances for varyig D2 values"

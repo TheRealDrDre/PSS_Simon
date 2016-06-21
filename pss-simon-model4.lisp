@@ -72,6 +72,8 @@
 	(proceed isa chunk)
 	(process isa chunk)
 
+	;;; The Simon Task rules:
+	
 	(circle-left isa simon-rule
 		     kind simon-rule
 		     has-motor-response yes
