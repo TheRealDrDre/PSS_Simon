@@ -463,22 +463,35 @@
 ;;; ------------------------------------------------------------------
 
 (defun analyze-log (log)
+  "Analyzes the log of a single run"
   (let* ((incong (remove-if #'trial-congruent? log))
 	 (cong (remove-if-not #'trial-congruent? log))
-	 (cong-acc (apply #'mean (mapcar #'trial-accuracy cong)))
-	 (incong-acc (apply #'mean (mapcar #'trial-accuracy incong)))
-	 (cong-rt (apply #'mean (mapcar #'trial-rt cong)))
-	 (incong-rt (apply #'mean (mapcar #'trial-rt (remove-if-not #'(lambda (x) (= (trial-accuracy x) 1)) incong)))))
-    (list (list :congruent cong-acc cong-rt)
-	  (list :incongruent incong-acc incong-rt))))
+	 (correct-incong (remove-if-not #'(lambda (x) (= (trial-accuracy x) 1))
+					incong))
+	 (correct-cong (remove-if-not #'(lambda (x) (= (trial-accuracy x) 1))
+					cong)))
+    
+    (if (or (null correct-incong)
+	    (null correct-cong))
+	;; If we don't have enough trials, return NA
+	'((:congruent :na) (:incongruent :na))
+	
+	;; Otherwise, compute accuracies and RTs (on correct trials)
+	(let* ((cong-acc (apply #'mean (mapcar #'trial-accuracy cong)))
+	       (incong-acc (apply #'mean (mapcar #'trial-accuracy incong)))
+	       (cong-rt (apply #'mean (mapcar #'trial-rt correct-cong)))
+	       (incong-rt (apply #'mean (mapcar #'trial-rt correct-incong))))
+	  (list (list :congruent cong-acc cong-rt)
+		(list :incongruent incong-acc incong-rt))))))
        
 (defun average-results (results)
+  "Averages results from multiple runs"
   (let ((cngs (mapcar 'first results))
-	(incngs (Mapcar 'second results)))
+	(incngs (mapcar 'second results)))
     (list (list :congruent
-		(apply 'mean (mapcar 'second cngs))
-		(apply 'mean (mapcar 'third cngs)))
+		(float (apply 'mean (remove-if-not #'numberp (mapcar 'second cngs))))
+		(float (apply 'mean (remove-if-not #'numberp (mapcar 'third cngs)))))
 	  (list :incongruent
-		(apply 'mean (mapcar 'second incngs))
-		(apply 'mean (mapcar 'third incngs))))))
+		(float (apply 'mean (remove-if-not #'numberp (mapcar 'second incngs))))
+		(float (apply 'mean (remove-if-not #'numberp (mapcar 'third incngs))))))))
 	  
