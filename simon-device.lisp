@@ -29,10 +29,8 @@
 	 (start (subseq pname 0 4)))
 
     (cond ((string-equal start "PROC")
-;	   (print (list pname "PROC"))
 	   (* *d1* reward))
 	  ((string-equal start "DONT")
-;	   (print (list pname "DONT"))
 	   (* *d2* reward))
 	  (t
 	   0.0))))
@@ -42,120 +40,6 @@
 ;;	 (start (subseq pname 0 4)))
 ;;    (spp ,production :u 14)
 ;;    nil))
-
-;;; ----------------------------------------------------------------
-;;; Running simulations
-;;; ----------------------------------------------------------------
-
-(defun simulate-d2 (n vals &key (out t) (report t))
-  " Generates a list of performances for varyig D2 values"
-  (format out "~{~a~^, ~}~%" '("D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
-  (dolist (v vals)
-    (setf *d2* v)
-    (let* ((res (simulate n :verbose nil))
-	   (nums (mapcar #'float
-			 (cons v
-			       (apply #'append
-				      (mapcar #'rest res))))))
-      (format out "~{~4,f~^, ~}~%" nums))))
-
-(defun simulate-d1-d2 (n vals &key (out t) (report t))
-  " Generates a list of performances for varying D1 and D2 values"
-  (format out "~{~a~^, ~}~%" '("D1" "D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
-  (dolist (v1 vals)
-    (dolist (v2 vals)
-      (setf *d1* v1)
-      (setf *d2* v2)
-      (let* ((results (simulate n 
-				:verbose nil 
-				:report report)))
-	(dolist (res results)
-	  (let ((nums (mapcar #'float
-			      (append (list v1 v2)
-				      (apply #'append
-					     (mapcar #'rest res))))))
-	    (format out "~{~4,f~^, ~}~%" nums)))))))
-
-
-(defun simulate (n &key (params nil) (verbose nil) (report t))
-  "Simulates N runs of the model, and returns the results either as a list or as a synthetic report"
-  (let ((results nil))
-    (dotimes (i n (average-results results))
-      (simon4-reload :visicon nil)
-      (when params
-	(sgp-fct (mapcan #'(lambda (x) (list (first x) (rest x))) params)))
-      (sgp :v nil
-	   :style-warnings nil
-	   :model-warnings nil)
-       (run 10000)
-      (when verbose
-	(when (= (mod i (round (/ n 10))) 0)
-	  (let* ((c (round (/ (* 10 i) n)))
-		 (empty (- 10 c))
-		 (bar (make-string c :initial-element #\=))
-		 (space (make-string empty :initial-element #\space))
-		 (total (format nil "|~A~A| ~A#\%" bar space (* 10 c))))
-	    
-	    (format t total)
-	    (finish-output))
-	  (if *using-swank*
-	      (format t "~%")
-	      (dotimes (i 17)
-		(write-char #\backspace)))))
-      (push (analyze-log (experiment-log (current-device)))
-	    results))
-    (if report
-	(List (average-results results))
-	results)))
-
-(defun result? (lst)
-  "Checks whether a lst is a summary of a run's results"
-  (and (= (length lst) 2)
-       (every #'keywordp (mapcar #'first lst)))
-       (every #'numberp (mapcar #'second lst))
-       (every #'numberp (mapcar #'third lst)))
-
-
-(defun incremental-average-results (avg current n)
-  (if (null avg)
-      current
-      (let ((avg-cong-acc (second (first avg)))
-	    (avg-cong-rt (third (first avg)))
-	    (avg-incong-acc (second (second avg)))
-	    (avg-incong-rt (third (second avg)))
-	    (curr-cong-acc (second (first current)))
-	    (curr-cong-rt (third (first current)))
-	    (curr-incong-acc (second (second current)))
-	    (curr-incong-rt (third (second current))))
-	(list (list :congruent
-		    (float (incremental-average avg-cong-acc curr-cong-acc n))
-		    (float (incremental-average avg-cong-rt curr-cong-rt n)))
-	      
-	      (list :congruent
-		    (float (incremental-average avg-incong-acc curr-incong-acc n))
-		    (float (incremental-average avg-incong-rt curr-incong-rt n)))))))
-
-
-
-(defun incremental-average (previous-mean current-value n)
-  (+ previous-mean (/ (- current-value previous-mean) n)))
-
-
-(defun inc-simulate (n)
-  (let ((results nil))
-    (dotimes (i n results)
-      ;(print i)
-      (simon4-reload :visicon nil)
-      (sgp :v nil
-	   :style-warnings nil
-	   :model-warnings nil)
-      (run 500)
-    
-      (setf results (incremental-average-results
-		     results
-		     (analyze-log (experiment-log (current-device)))
-		     i)))))
-					;(print results)
 
 
 
@@ -209,17 +93,17 @@
 			    (list (list (first lst)))))))
 
 
-;;; A simon-trial of the form (shape circle position left)
+;;; A simon-trial of the form (shape circle location left)
 
 (defparameter *default-simon-rule* '(shape . ((circle . left) (square . right))))
 
 (defparameter *responses* '((f . left) (j . right)))
 
-(defparameter *default-simon-congruent-stimuli* '((shape circle position left)
-						 (shape square position right)))
+(defparameter *default-simon-congruent-stimuli* '((shape circle location left)
+						 (shape square location right)))
 
-(defparameter *default-simon-incongruent-stimuli* '((shape circle position right)
-						    (shape square position left)))
+(defparameter *default-simon-incongruent-stimuli* '((shape circle location right)
+						    (shape square location left)))
 
 
 (defun simon-stimulus? (lst)
@@ -233,13 +117,13 @@
       (rest (assoc value (rest rule))))))
 
 (defun stimulus-congruent? (stimulus)
-  (let ((pos (second (assoc 'position (divide-into-pairs stimulus)))))
+  (let ((pos (second (assoc 'location (divide-into-pairs stimulus)))))
     (when (equalp pos (stimulus-correct-response stimulus))
       t)))
 
 
 (defun stimulus-incongruent? (stimulus)
-  (let ((pos (second (assoc 'position (divide-into-pairs stimulus)))))
+  (let ((pos (second (assoc 'location (divide-into-pairs stimulus)))))
     (unless (equalp pos (stimulus-correct-response stimulus))
       t)))
 
