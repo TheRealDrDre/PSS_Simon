@@ -367,8 +367,8 @@
     (if (or (null correct-incong)
 	    (null correct-cong))
 	;; If we don't have enough trials, return NA
-	'((:congruent :na) (:incongruent :na))
-	
+	;;'((:congruent :na) (:incongruent :na))
+	'(:na :na :na :na)
 	;; Otherwise, compute accuracies and RTs (on correct trials)
 	(let* ((cong-acc (apply #'mean (mapcar #'trial-accuracy cong)))
 	       (incong-acc (apply #'mean (mapcar #'trial-accuracy incong)))
@@ -398,8 +398,8 @@
 
 	  
 (defun average-results (results)
-  """Averages values across a list of results"""
-  (when (every #'result? results)
+  "Averages values across a list of results"
+  (if (every #'result? results)
     (let* ((meanres nil)
 	   (n (length (first results))))
       (dotimes (i n (reverse meanres))
@@ -409,4 +409,9 @@
 		       (remove-if-not #'numberp
 				      (mapcar #'(lambda (x) (nth i x))
 					      results))))))
-	  (push avg meanres))))))
+	  (push avg meanres))))
+    (progn
+      (format t "   Not every results is a result")
+      (setf *results* results))))
+    
+(defparameter *results* nil)

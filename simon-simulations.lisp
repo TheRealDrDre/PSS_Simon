@@ -39,6 +39,7 @@
       (dolist (partial nums)
 	(format out "~{~4,f~^, ~}~%" partial)))))
 
+
 (defun simulate-d1-d2 (n vals &key (out t) (report t))
   "Generates a list of performances for varying D1 and D2 values"
   (format out "~{~a~^, ~}~%" '("D1" "D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
@@ -66,12 +67,13 @@
 
 
 (defun simulate (n &key (params nil) (verbose nil) (report t))
-  "Simulates N runs of the model, and returns the results either as a list or as a synthetic report"
+  "Simulates N runs of the model, and returns the results either as a list or as a report"
   (let ((results nil))
     (dotimes (i n (average-results results))
-      (simon4-reload :visicon nil)
+      (simon-reload :visicon nil)
       (when params
-	(sgp-fct (mapcan #'(lambda (x) (list (first x) (rest x))) params)))
+	;(sgp-fct (mapcan #'(lambda (x) (list (first x) (rest x))) params)))
+	(sgp-fct (mapcan #'(lambda (x) x) params)))
       (sgp :v nil
 	   :style-warnings nil
 	   :model-warnings nil)

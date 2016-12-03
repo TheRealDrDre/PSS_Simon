@@ -25,19 +25,19 @@
      :esc T
      :ans 0.5
      :auto-attend T
-     :le 0.67
-     :lf 0.3
+     :le 0.63
+;     :lf 0.3
      :mas 4.0
      :ul T
      :egs 0.1
      :reward-hook bg-reward-hook
      :alpha 0.4
      :imaginal-activation 3.0
-     :imaginal-delay 0.1
+;     :imaginal-delay 0.1
 ;     :visual-activation 2.0
-     :motor-burst-time 0.05
-     :motor-feature-prep-time 0.05    
-     :motor-initiation-time 0.01
+     ;:motor-burst-time 0.05
+     :motor-feature-prep-time 0.01    
+;     :motor-initiation-time 0.01
 )
 
 (chunk-type (simon-stimulus (:include visual-object))
@@ -54,7 +54,7 @@
 (chunk-type compatible-response has-motor-response hand location)
 
 
-(chunk-type wm       ;; Working Memory. Simple imagine chuink with 2 slots
+(chunk-type wm       ;; Working Memory. Simple imaginal chunk with 2 slots
 	    state
 	    value1
 	    value2
