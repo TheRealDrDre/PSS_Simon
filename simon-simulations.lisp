@@ -29,25 +29,25 @@
 	  prods))
 
 
-(defun simulate-d2 (n vals &key (out t) (report t))
+(defun simulate-d2 (n vals &key (out t) (report t) (params nil))
   " Generates a list of performances for varyig D2 values"
   (format out "~{~a~^, ~}~%" '("D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
   (dolist (v vals)
     (setf *d2* v)
-    (let* ((res (simulate n :verbose nil :report report))
+    (let* ((res (simulate n :verbose nil :report report :params params))
 	   (nums (mapcar #'(lambda (x) (cons v x)) res)))
       (dolist (partial nums)
 	(format out "~{~4,f~^, ~}~%" partial)))))
 
 
-(defun simulate-d1-d2 (n vals &key (out t) (report t))
+(defun simulate-d1-d2 (n vals &key (out t) (report t) (params nil))
   "Generates a list of performances for varying D1 and D2 values"
   (format out "~{~a~^, ~}~%" '("D1" "D2" "Con/ACC" "Con/RT" "In/ACC" "In/RT"))
   (dolist (v1 vals)
     (dolist (v2 vals)
       (setf *d1* v1)
       (setf *d2* v2)
-      (let* ((res (simulate n :verbose nil :report report))
+      (let* ((res (simulate n :verbose nil :report report :params params))
 	     (nums (mapcar #'(lambda (x) (append 
 					  (list v1 v2) 
 					  x)) 
