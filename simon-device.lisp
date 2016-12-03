@@ -240,6 +240,7 @@
       
 
 (defmethod next ((task simon-task))
+  "Moves to the next step in a Simon Task timeline"
   (cond ((equal (task-phase task) 'stimulus)
 	 (setf (task-phase task) 'pause)
 	 (push (current-trial task) (experiment-log task))
@@ -373,17 +374,38 @@
 	       (incong-acc (apply #'mean (mapcar #'trial-accuracy incong)))
 	       (cong-rt (apply #'mean (mapcar #'trial-rt correct-cong)))
 	       (incong-rt (apply #'mean (mapcar #'trial-rt correct-incong))))
-	  (list (list :congruent cong-acc cong-rt)
-		(list :incongruent incong-acc incong-rt))))))
-       
-(defun average-results (results)
-  "Averages results from multiple runs"
-  (let ((cngs (mapcar 'first results))
-	(incngs (mapcar 'second results)))
-    (list (list :congruent
-		(float (apply 'mean (remove-if-not #'numberp (mapcar 'second cngs))))
-		(float (apply 'mean (remove-if-not #'numberp (mapcar 'third cngs)))))
-	  (list :incongruent
-		(float (apply 'mean (remove-if-not #'numberp (mapcar 'second incngs))))
-		(float (apply 'mean (remove-if-not #'numberp (mapcar 'third incngs))))))))
+	  (list cong-acc cong-rt incong-acc incong-rt)))))
+
+
+(defun result? (lst)
+  "A list is a result IFF it's made of at least four numbers"
+  (and (>= (length lst) 4)
+       (every 'numberp lst)))
+
+(defun result-congruent-accuracy (res)
+  (nth 0 res))
+
+(defun result-congruent-rt (res)
+  (nth 1 res))
+
+(defun result-incongruent-accuracy (res)
+  (nth 2 res))
+
+(defun result-incongruent-rt (res)
+  (nth 3 res))
+
 	  
+(defun average-results (results)
+  (when (every #'result? results)
+    (let* ((meanres nil)
+	   (n (length (first results))))
+      (dotimes (i n (reverse meanres))
+	(let ((avg
+	       (float
+		(apply 'mean
+		       (remove-if-not #'numberp
+				      (mapcar #'(lambda (x) (nth i x))
+					      results))))))
+	  (push avg meanres))))))
+	       
+      

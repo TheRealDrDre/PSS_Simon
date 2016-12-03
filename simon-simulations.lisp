@@ -9,16 +9,24 @@
 ;;; ----------------------------------------------------------------
 
 (defun decision-productions ()
-  "Returns a sorted list of decision productions for a model, first 'picks' and then 'donts'" 
+  "Returns a sorted list of decision productions for a model, ('picks' first)"
   (let* ((prods (no-output (spp)))
-	 (dos (remove-if-not #'(lambda (x) (string-equal (subseq (symbol-name x) 0 4) "proc")) prods))
-	 (donts (remove-if-not #'(lambda (x) (string-equal (subseq (symbol-name x) 0 4) "dont")) prods)))
+	 (dos 
+	  (remove-if-not #'(lambda (x) 
+			     (string-equal (subseq (symbol-name x) 0 4) "proc")) 
+			 prods))
+	 (donts 
+	  (remove-if-not #'(lambda (x) 
+			     (string-equal (subseq (symbol-name x) 0 4) "dont")) 
+			 prods)))
     (append (sort dos #'string< :key 'symbol-name)
 	    (sort donts #'string< :key 'symbol-name))))
 
 (defun decision-utilities (prods)
   "Returns a list of utilities associated with a list of productions"
-  (mapcar #'(lambda (x) (caar (no-output (spp-fct (list x :u))))) prods))
+  (mapcar #'(lambda (x) 
+	      (caar (no-output (spp-fct (list x :u))))) 
+	  prods))
 
 
 (defun simulate-d2 (n vals &key (out t) (report t))
@@ -83,12 +91,12 @@
 	(list (average-results results))
 	results)))
 
-(defun result? (lst)
-  "Checks whether a lst is a summary of a run's results"
-  (and (= (length lst) 2)
-       (every #'keywordp (mapcar #'first lst)))
-       (every #'numberp (mapcar #'second lst))
-       (every #'numberp (mapcar #'third lst)))
+;(defun result? (lst)
+ ; "Checks whether a lst is a summary of a run's results"
+ ; (and (= (length lst) 2)
+ ;      (every #'keywordp (mapcar #'first lst)))
+ ;      (every #'numberp (mapcar #'second lst))
+  ;     (every #'numberp (mapcar #'third lst)))
 
 
 (defun incremental-average-results (avg current n)
