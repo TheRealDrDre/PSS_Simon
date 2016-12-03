@@ -380,7 +380,9 @@
 (defun result? (lst)
   "A list is a result IFF it's made of at least four numbers"
   (and (>= (length lst) 4)
-       (every 'numberp lst)))
+       (every #'(lambda (x) (or (numberp x)
+				(keywordp x)))
+	      lst)))
 
 (defun result-congruent-accuracy (res)
   (nth 0 res))
@@ -396,6 +398,7 @@
 
 	  
 (defun average-results (results)
+  """Averages values across a list of results"""
   (when (every #'result? results)
     (let* ((meanres nil)
 	   (n (length (first results))))
@@ -407,5 +410,3 @@
 				      (mapcar #'(lambda (x) (nth i x))
 					      results))))))
 	  (push avg meanres))))))
-	       
-      
