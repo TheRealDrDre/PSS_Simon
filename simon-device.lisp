@@ -21,7 +21,9 @@
 
 (defparameter *d2* 1)
 
-(defparameter *reward* 10)
+(defparameter *bias* 10)
+
+(defparameter *error-penalty* -1)
 
 (defun bg-reward-hook (production reward time)
   (declare (ignore time))
