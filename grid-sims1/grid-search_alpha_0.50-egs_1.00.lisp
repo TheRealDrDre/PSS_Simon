@@ -5,7 +5,7 @@
 (load "../simon-simulations.lisp")
 (with-open-file (out "grid-search-alpha_0.50-lf_1.00.txt" :direction :output 
 		     :if-exists :overwrite :if-does-not-exist :create)
-  (simulate-psp 250
+  (simulate-psp 100
 		out
                 :alpha 0.50
                 :lf 1.00))

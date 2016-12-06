@@ -110,6 +110,7 @@
 
 (defparameter *parameters* '(:alpha :lf :egs :ans *bias* *d1* *d2*))
 
+
 (defun seq (start end &optional (step 1))
   "Creates a range"
   (let ((results nil)
@@ -138,11 +139,13 @@
       (no-output (sgp-fct (list x)))
       (list (eval x))))
 
+
 (defun param-values (&optional (params *parameters*))
   (mapcan #'param-value params))
 
 
 (defun simulate-psp (n out &key (alpha 0.4) (lf 0.2))
+  "Grid search of parameter space"
   (dolist (egs (seq 0 1.1 2/10))
     (dolist (ans (seq 0.2 1.1 2/10))
       (dolist (bias (seq 1 11 1))
@@ -153,7 +156,7 @@
 	  ;(print params)
 	  (setf *bias* bias)
 	  (setf *d1* 1 *d2* 1)
-	  (dolist (d1 (seq 0.2 2.1 0.2))
+	  (dolist (d1 (seq 0.25 2.1 0.25))
 	    (setf *d1* d1)
 	    ;(print (list "Z" d1 n params))
 	    (let* ((res (simulate n :params params :report t))
