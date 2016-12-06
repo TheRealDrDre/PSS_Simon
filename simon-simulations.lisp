@@ -65,16 +65,6 @@
 	(dolist (partial nums)
 	  (format out "~{~4,f~^, ~}~%" partial))))))
 
-      (let* ((results (simulate n 
-				:verbose nil 
-				:report report)))
-	(dolist (res results)
-	  (let ((nums (mapcar #'float
-			      (append (list v1 v2)
-				      (apply #'append
-					     (mapcar #'rest res))))))
-	    (format out "~{~4,f~^, ~}~%" nums)))))))
-
 
 (defun simulate (n &key (params nil) (verbose nil) (report t))
   "Simulates N runs of the model, and returns the results either as a list or as a report"
@@ -83,7 +73,7 @@
       (simon-reload :visicon nil)
       (when params
 	;(sgp-fct (mapcan #'(lambda (x) (list (first x) (rest x))) params)))
-	(sgp-fct (mapcan #'(lambda (x) x) params)))
+	(sgp-fct (flatten params)))
       (sgp :v nil
 	   :style-warnings nil
 	   :model-warnings nil)
@@ -118,63 +108,65 @@
 ;;; Which are the data patterns of interest? 
 ;;; -------------------------------------------------------------- ;;;
 
-(defparameter *parameters* ((:lf . (0.1 1))
-			    (:le . (0.1 1))
-			    (:alpha . (0.1 1))))
-				 
+(defparameter *parameters* '(:alpha :lf :egs :ans *bias* *d1* *d2*))
 
- 
-;;; -------------------------------------------------------------- ;;;
-;;; Model flexibility analysis
-;;; -------------------------------------------------------------- ;;;
-;;; Determines how much flexbility the model can produce, given
-;;; parameters.
-;;; -------------------------------------------------------------- ;;;
-
-
-
-;;; -------------------------------------------------------------- ;;;
-;;; Various attempts at efficiency
-;;; -------------------------------------------------------------- ;;;
-
-(defun incremental-average-results (avg current n)
-  (if (null avg)
-      current
-      (let ((avg-cong-acc (second (first avg)))
-	    (avg-cong-rt (third (first avg)))
-	    (avg-incong-acc (second (second avg)))
-	    (avg-incong-rt (third (second avg)))
-	    (curr-cong-acc (second (first current)))
-	    (curr-cong-rt (third (first current)))
-	    (curr-incong-acc (second (second current)))
-	    (curr-incong-rt (third (second current))))
-	(list (list :congruent
-		    (float (incremental-average avg-cong-acc curr-cong-acc n))
-		    (float (incremental-average avg-cong-rt curr-cong-rt n)))
-	      
-	      (list :congruent
-		    (float (incremental-average avg-incong-acc curr-incong-acc n))
-		    (float (incremental-average avg-incong-rt curr-incong-rt n)))))))
+(defun seq (start end &optional (step 1))
+  "Creates a range"
+  (let ((results nil)
+	(partial start))
+    (cond ((and (< start end)
+		(plusp step))
+	   (loop while (< partial end) do
+	     (push partial results)
+	     (incf partial step)))
+	  ((and (> start end)
+		(minusp step))
+	   (loop while (> partial end) do
+	     (push partial results)
+	     (incf partial step)))
+	  (t
+	   nil))
+    (reverse results)))
 
 
+(defun act-r-parameter? (sym)
+  (keywordp sym))
 
-(defun incremental-average (previous-mean current-value n)
-  (+ previous-mean (/ (- current-value previous-mean) n)))
+
+(defun param-value (x)
+  (if (act-r-parameter? x)
+      (no-output (sgp-fct (list x)))
+      (list (eval x))))
+
+(defun param-values (&optional (params *parameters*))
+  (mapcan #'param-value params))
 
 
-(defun inc-simulate (n)
-  (let ((results nil))
-    (dotimes (i n results)
-      ;(print i)
-      (simon4-reload :visicon nil)
-      (sgp :v nil
-	   :style-warnings nil
-	   :model-warnings nil)
-      (run 500)
-    
-      (setf results (incremental-average-results
-		     results
-		     (analyze-log (experiment-log (current-device)))
-		     i)))))
-					;(print results)
+(defun simulate-psp (n out &key (alpha 0.4) (lf 0.2))
+  (dolist (egs (seq 0 1.1 2/10))
+    (dolist (ans (seq 0.2 1.1 2/10))
+      (dolist (bias (seq 1 11 1))
+	(let ((params `((:alpha ,alpha)
+			(:lf ,lf)
+			(:ans ,ans)
+			(:egs ,egs))))
+	  ;(print params)
+	  (setf *bias* bias)
+	  (setf *d1* 1 *d2* 1)
+	  (dolist (d1 (seq 0.2 2.1 0.2))
+	    (setf *d1* d1)
+	    ;(print (list "Z" d1 n params))
+	    (let* ((res (simulate n :params params :report t))
+		   (row (append (param-values)
+				(first res))))
+	      (format out "~{~4,f~^, ~}~%" row)
+	      (finish-output)))
 
+	  (setf *d1* 1 *d2* 1)
+	  (dolist (d2 (seq 0.2 2.1 0.2))
+	    (setf *d2* d2)
+	    (let* ((res (simulate n :params params :report t))
+		   (row (append (param-values)
+				(first res))))
+	      (format out "~{~4,f~^, ~}~%" row)
+	      (finish-output))))))))

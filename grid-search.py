@@ -2,18 +2,16 @@
 
 TMPLT = """
 (load "/projects/actr/actr7/load-act-r.lisp")
-(load "pss-device.lisp")
-(defparameter *params* '((:alpha . %0.2f) (:EGS . %0.2f)))
-(with-open-file (out "sims-positive-negative-alpha_%0.2f-egs_%0.2f-noncomp.txt" :direction :output 
+(load "simon-device.lisp")
+(load "simon-model.lisp")
+(load "simon-simulations.lisp")
+(with-open-file (out "grid-search-alpha_%0.2f-lf_%0.2f.txt" :direction :output 
 		     :if-exists :overwrite :if-does-not-exist :create)
-  (simulate-positive-negative-feedback "pss-model-noncompetitive.lisp"
-				     250
-				     (seq 0.0 1.01 1/10)
-				     :neg-vals (seq 0.0 -1.01 -1/10)
-				     :stream out
-				     :report nil
-				     :utilities t
-				     :params *params*))
+  (simulate-psp 250
+		out
+                :alpha %0.2f
+                :lf %0.2f))
+		
 """
 
 
@@ -23,10 +21,10 @@ TMPLT = """
    
 if __name__ == "__main__":
     i = 1
-    for alpha in [x/10.0 for x in range(11)]:
-        for egs in [x/10.0 for x in range(11)]:
-            fout = open("sims-alpha_%0.2f-egs_%0.2f-noncomp.lisp" % (alpha, egs), 'w')
-            s = TMPLT % (alpha, egs, alpha, egs)
+    for alpha in [x/100.0 for x in range(0,101,25)]:
+        for lf in [x/100.0 for x in range(0,101,25)]:
+            fout = open("grid-search_alpha_%0.2f-egs_%0.2f.lisp" % (alpha, lf), 'w')
+            s = TMPLT % (alpha, lf, alpha, lf)
             fout.write(s)
             fout.flush()
             fout.close()
