@@ -112,7 +112,7 @@
 
 
 (defun seq (start end &optional (step 1))
-  "Creates a range"
+  "Creates a list with a range of numbers"
   (let ((results nil)
 	(partial start))
     (cond ((and (< start end)
@@ -131,16 +131,25 @@
 
 
 (defun act-r-parameter? (sym)
+  "Checks whether a symbol names an ACT-R parameter"
   (keywordp sym))
 
 
 (defun param-value (x)
+  "Returns the correct value of a parameter (whether ACT-R or not)"
   (if (act-r-parameter? x)
       (no-output (sgp-fct (list x)))
       (list (eval x))))
 
+(defun param-name (x)
+  "Returns the name of a parameter"
+  (let ((str (format nil "~A" x)))
+    (string-trim "*:" str)))
+	
+ 
 
 (defun param-values (&optional (params *parameters*))
+  "Returns the values of all parameters as a list"
   (mapcan #'param-value params))
 
 
@@ -158,7 +167,6 @@
 	  (setf *d1* 1 *d2* 1)
 	  (dolist (d1 (seq 0.25 2.1 0.25))
 	    (setf *d1* d1)
-	    ;(print (list "Z" d1 n params))
 	    (let* ((res (simulate n :params params :report t))
 		   (row (append (param-values)
 				(first res))))
@@ -166,10 +174,25 @@
 	      (finish-output)))
 
 	  (setf *d1* 1 *d2* 1)
-	  (dolist (d2 (seq 0.2 2.1 0.2))
+	  (dolist (d2 (seq 0.25 2.1 0.25))
 	    (setf *d2* d2)
 	    (let* ((res (simulate n :params params :report t))
 		   (row (append (param-values)
 				(first res))))
 	      (format out "~{~4,f~^, ~}~%" row)
 	      (finish-output))))))))
+
+(defun approx-equal (val1 val2)
+  (let ((percent-diff  (/ (abs (- val1 val2))
+			  (min val1 val2))))
+    (< percent-diff 2/100)))
+
+(defun approx-diff (val1 val2)
+  (if (approx-equal val1 val2)
+      0
+      (- val1 val2)))
+
+;;; Nine possible data patterns can be predicted
+;;;
+
+
