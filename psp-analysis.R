@@ -90,28 +90,25 @@ error <- function(a, b, c, d) {
   tvec <- 100 * c(mean(c(ta,tb)), mean(c(tc,td)), ta - tb, tc - td)
   
   sum((vec - tvec) ** 2)
-  
 }
 
 verror <- Vectorize(error)
 
 test$Error <- verror(test$Con_ACC, test$Incon_ACC,
-                       test$Con_RT, test$Incon_RT)
+                     test$Con_RT, test$Incon_RT)
 
 
 error2 <- function(a, b, c, d) {
   ta <- target[1]
   tb <- target[2]
-  tc <- target[3]
+  tc <- target[3]s
   td <- target[4]
   
   vec <- 100 * c(a, c, a - b, c - d)
   tvec <- 100 * c(ta, tc, ta - tb, tc - td)
   
   sum((vec - tvec) ** 2)
-  
 }
-
 
 
 verror2 <- Vectorize(error2)
@@ -151,36 +148,48 @@ calculate.beta <- function(data, var1, var2, alpha, lf, egs, ans, bias) {
   m$coefficients[2]
 }
 
-vcalcbeta <- Vectorize(calculate.beta)
+calculate.r <- function(data, var1, var2, alpha, lf, egs, ans, bias) {
+  subset <- subset(data, data$Alpha == alpha & data$LF == lf & data$EGS == egs & data$ANS == ans & data$Bias == bias)
+  cor(subset[[var1]], subset[[var2]])
+}
+#vcalcbeta <- Vectorize(calculate.beta)
 
 d1test <- subset(test, test$Cond == "D1")
 d2test <- subset(test, test$Cond == "D2")
 
-d1a <- aggregate(d1test[c("Con_RT")], list(Alpha = d1test$Alpha,
-                                           EGS = d1test$EGS,
-                                           ANS = d1test$ANS,
-                                           LF =d1test$LF,
-                                           Bias = d1test$Bias,
-                                           Cond = d1test$Cond),
+space <- aggregate(test[c("Con_RT")], list(Alpha = test$Alpha,
+                                       EGS = test$EGS,
+                                       ANS = test$ANS,
+                                       LF = test$LF,
+                                       Bias = test$Bias),
                      length)
 
-d2a <- aggregate(d2test[c("Con_RT")], list(Alpha = d2test$Alpha,
-                                           EGS = d2test$EGS,
-                                           ANS = d2test$ANS,
-                                           LF =d2test$LF,
-                                           Bias = d2test$Bias,
-                                           Cond = d2test$Cond),
-                 length)
+
+space$beta_D1_Inc <- 0
+space$beta_D2_Inc <- 0
+space$beta_D1_Con <- 0
+space$beta_D2_Con <- 0
+
+space$r_D1_Inc <- 0
+space$r_D2_Inc <- 0
+space$r_D1_Con <- 0
+space$r_D2_Con <- 0
 
 
-d1a$beta_D1_Inc < -0
-
-for (a in unique(d1a$Alpha)) {
-  for (l in unique(d1a$LF)) {
-    for (e in unique(d1a$EGS)) {
-      for (n in unique(d1a$ANS)) {
-        for (b in unique(d1a$Bias)) {
-          d1a$beta_D1_Inc[d1a$Alpha == a & d1a$LF == l & d1a$EGS == e & d1a$ANS == n & d1a$Bias == b] <- calculate.beta(d1test, "D1", "Incon_RT", a, l, e, n, b)
+for (a in unique(space$Alpha)) {
+  for (l in unique(space$LF)) {
+    for (e in unique(space$EGS)) {
+      for (n in unique(space$ANS)) {
+        for (b in unique(space$Bias)) {
+          space$beta_D1_Inc[space$Alpha == a & space$LF == l & space$EGS == e & space$ANS == n & space$Bias == b] <- calculate.beta(d1test, "D1", "Incon_RT", a, l, e, n, b)
+          space$beta_D2_Inc[space$Alpha == a & space$LF == l & space$EGS == e & space$ANS == n & space$Bias == b] <- calculate.beta(d2test, "D2", "Incon_RT", a, l, e, n, b)
+          space$beta_D1_Con[space$Alpha == a & space$LF == l & space$EGS == e & space$ANS == n & space$Bias == b] <- calculate.beta(d1test, "D1", "Con_RT", a, l, e, n, b)
+          space$beta_D2_Con[space$Alpha == a & space$LF == l & space$EGS == e & space$ANS == n & space$Bias == b] <- calculate.beta(d2test, "D2", "Con_RT", a, l, e, n, b)
+          space$r_D1_Inc[space$Alpha == a & space$LF == l & space$EGS == e & space$ANS == n & space$Bias == b] <- calculate.r(d1test, "D1", "Incon_RT", a, l, e, n, b)
+          space$r_D2_Inc[space$Alpha == a & space$LF == l & space$EGS == e & space$ANS == n & space$Bias == b] <- calculate.r(d2test, "D2", "Incon_RT", a, l, e, n, b)
+          space$r_D1_Con[space$Alpha == a & space$LF == l & space$EGS == e & space$ANS == n & space$Bias == b] <- calculate.r(d1test, "D1", "Con_RT", a, l, e, n, b)
+          space$r_D2_Con[space$Alpha == a & space$LF == l & space$EGS == e & space$ANS == n & space$Bias == b] <- calculate.r(d2test, "D2", "Con_RT", a, l, e, n, b)
+          
         }
       }
     }
@@ -195,7 +204,7 @@ for (a in unique(d2a$Alpha)) {
     for (e in unique(d2a$EGS)) {
       for (n in unique(d2a$ANS)) {
         for (b in unique(d2a$Bias)) {
-          d2a$beta_D2_Inc[d2a$Alpha == a & d2a$LF == l & d2a$EGS == e & d2a$ANS == n & d2a$Bias == b] <- calculate.beta(d2test, "D1", "Incon_RT", a, l, e, n, b)
+          d2a$beta_D2_Inc[d2a$Alpha == a & d2a$LF == l & d2a$EGS == e & d2a$ANS == n & d2a$Bias == b] <- calculate.beta(d2test, "D2", "Incon_RT", a, l, e, n, b)
         }
       }
     }
