@@ -327,7 +327,10 @@
 ;;; SETUP
 ;;; -------------------------------------------------------------- ;;;
 
-;(spp check-pass :reward 1)
+;;; Enabled for sims #3
+(spp check-pass :reward 1)
+
+; Standard versions 
 (spp check-detect-problem :reward -1)
 ;(spp process-shape :u 1 :fixed-utility t)
 ;(spp process-location :u 0.7 :fixed-utility t)
