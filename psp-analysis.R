@@ -1,7 +1,17 @@
 # Damn
 
+
+
 test <- read.table('grid-sims1/final.txt', header=F, sep=",")
 names(test) <- c("Alpha", "LF", "EGS", "ANS", "Bias", "D1", "D2", "Con_ACC", "Con_RT", "Incon_ACC", "Incon_RT")
+
+target <- c(0.98, 0.88, 0.421, 0.489)  # Target data
+
+
+## --------------------------------------------------------------- ##
+## PARAMETER SPACE PARITIONING FOR SIMON TASK DATA
+## --------------------------------------------------------------- ##
+
 
 approx.equal <- function(x, y) {
   if (abs(x-y)/min(c(x,y)) < 0.02) {
@@ -74,11 +84,100 @@ plot.multid <- function() {
 d <- round(tapply(test$Con_ACC, test$Pattern, length) / 135000, 4)
 pie(d)
 
+s1 <- tapply(test$Pattern, list(EGS = test$EGS, LF = test$LF, ANS=test$ANS), median)
+s2 <- tapply(test$Pattern, list(Alpha = test$Alpha, Bias = test$Bias), median)
+s3 <- tapply(test$Pattern, list(D1 = test$D1, D2  = test$D2), median)
+
+# Model flexbility graph
+
+N = 100
+x <- (1:N)/N
+y <- (1:N)/N
+
+m <- outer(x,y)
+
+# Create matrix image
+
+for (i in x) {
+  for (j in y) {
+    z <- subset(test, test$Con_RT <= i & test$Con_RT > (i - 1/N) 
+                & test$Incon_RT <= j & test$Incon_RT > (j - 1/N))
+    #print(dim(z[1]))
+    m[i*N,j*N] <- dim(z)[1]
+  }
+}
+
+
+m[m<1] <- 0
+
+image(m, col=jet.colors(20))
+points(x=target[3], y=target[4], col="white", lwd=2, pch=3)
+grid()
+title(main="Model Flexibility: Response Times", xlab="Congruent trials (secs)", ylab="Incongruent trials (secs)")
+box(bty="o")
+
+
+# Greyscale version
+# -----------------
+image(m, col=grey(20:5/20))
+points(x=target[3], y=target[4], col="red", lwd=2, pch=3)
+grid()
+title(main="Model Flexibility: Response Times", xlab="Congruent trials (secs)", ylab="Incongruent trials (secs)")
+box(bty="o")
+
+
+# Better Greyscale version
+# -----------------
+levelplot(m, col.regions=gray(20:1/20))
+points(x=target[3], y=target[4], col="red", lwd=2, pch=3)
+grid()
+title(main="Model Flexibility: Response Times", xlab="Congruent trials (secs)", ylab="Incongruent trials (secs)")
+box(bty="o")
+
+
+# Flexibility p-value
+length(m[m>=1]) / (N**2)
+
+
+## ACCURACIES
+## ==========
+
+macc <- outer(x,y)
+
+# Create matrix image
+# -------------------
+
+for (i in x) {
+  for (j in y) {
+    z <- subset(test, test$Con_ACC <= i & test$Con_ACC > (i - 1/N) 
+                & test$Incon_ACC <= j & test$Incon_ACC > (j - 1/N))
+    #print(dim(z[1]))
+    macc[i*N,j*N] <- dim(z)[1]
+  }
+}
+
+macc[macc<1] <- 0
+image(macc, col=jet.colors(20))
+grid()
+title(main="Model Flexibility: Accuracy", xlab="Congruent trials", ylab="Incongruent trials")
+box(bty="o")
+
+# Greyscale version
+# -----------------
+image(macc, col=grey(20:5/20))
+grid()
+points(x=target[1], y=target[2], col="red", lwd=2, pch=3)
+title(main="Model Flexibility: Accuracy", xlab="Congruent trials (secs)", ylab="Incongruent trials (secs)")
+box(bty="o")
+
+
+# Flexibility p-value
+length(macc[macc>=1]) / (N**2)
+
 ## --------------------------------------------------------------- ##
-## ERROR FUNCTION
+## ERROR FUNCTION AND FIT OPTIMIZATION
 ## --------------------------------------------------------------- ##
 
-target <- c(0.98, 0.88, 0.421, 0.489)  # Target data
 
 error <- function(a, b, c, d) {
   ta <- target[1]
