@@ -196,17 +196,9 @@ for (a in unique(space$Alpha)) {
   }
 } 
 
+space$diff_d2_r <- space$r_D2_Inc - space$r_D2_Con
+space$diff_d2_r[is.na(space$diff_d2_r)] <- 0
 
-d2a$beta_D2_Inc < -0
-
-for (a in unique(d2a$Alpha)) {
-  for (l in unique(d2a$LF)) {
-    for (e in unique(d2a$EGS)) {
-      for (n in unique(d2a$ANS)) {
-        for (b in unique(d2a$Bias)) {
-          d2a$beta_D2_Inc[d2a$Alpha == a & d2a$LF == l & d2a$EGS == e & d2a$ANS == n & d2a$Bias == b] <- calculate.beta(d2test, "D2", "Incon_RT", a, l, e, n, b)
-        }
-      }
-    }
-  }
-} 
+error3 <- function() {
+  
+}
