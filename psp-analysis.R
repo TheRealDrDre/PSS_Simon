@@ -226,14 +226,14 @@ points(d1_optimal$D1, d1_optimal$Incon_RT, , pch=21, bg="white")
 
 
 # Different version of "optimal"
-d1_optimal <- subset(d1test, d1test$Alpha %in% c(0.25, 05) & d1test$LF == 0.25 & d1test$EGS== 0 & d1test$ANS==0.2 & d1test$Bias <= 10)
+d1_optimal <- subset(d1test, d1test$Alpha %in% c(0.25, 0.5) & d1test$LF %in% c(0.25, 0.5) & d1test$EGS== 0 & d1test$ANS==0.2 & d1test$Bias <= 10)
 d1_optimal <- aggregate(d1_optimal[c("Incon_RT")], list(D1=d1_optimal$D1), mean)
-d2_optimal <- subset(d2test, d2test$Alpha %in% c(0.25, 05) & d2test$LF == 0.25 & d2test$EGS== 0 & d2test$ANS==0.2 & d2test$Bias <= 10)
+d2_optimal <- subset(d2test, d2test$Alpha %in% c(0.25, 0.5) & d2test$LF %in% c(0.25, 0.5) & d2test$EGS== 0 & d2test$ANS==0.2 & d2test$Bias <= 10)
 d2_optimal <- aggregate(d2_optimal[c("Incon_RT")], list(D2=d2_optimal$D2), mean)
 
 
 
-plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.490,0.520))
+plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.450,0.550))
 points(d2_optimal$D2, d2_optimal$Incon_RT, pch=21, bg="black")
 lines(d1_optimal$D1, d1_optimal$Incon_RT, type="l", lty=2)
 points(d1_optimal$D1, d1_optimal$Incon_RT, , pch=21, bg="white")
