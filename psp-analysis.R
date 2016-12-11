@@ -101,7 +101,7 @@ test$Error <- verror(test$Con_ACC, test$Incon_ACC,
 error2 <- function(a, b, c, d) {
   ta <- target[1]
   tb <- target[2]
-  tc <- target[3]s
+  tc <- target[3]
   td <- target[4]
   
   vec <- 100 * c(a, c, a - b, c - d)
@@ -196,9 +196,44 @@ for (a in unique(space$Alpha)) {
   }
 } 
 
+space$r_D1_Con[is.na(space$r_D1_Con)] <- 0
+space$r_D1_Inc[is.na(space$r_D1_Inc)] <- 0
+space$r_D2_Con[is.na(space$r_D2_Con)] <- 0
+space$r_D2_Inc[is.na(space$r_D2_Inc)] <- 0
+
+
 space$diff_d2_r <- space$r_D2_Inc - space$r_D2_Con
 space$diff_d2_r[is.na(space$diff_d2_r)] <- 0
+
+
+
 
 error3 <- function() {
   
 }
+
+
+d1_optimal <- subset(d1test, d1test$Alpha == 0.25 & d1test$LF == 0.25 & d1test$EGS== 0 & d1test$ANS==0.2 & d1test$Bias == 10)
+plot(d1_optimal$D1, d1_optimal$Incon_RT)
+
+d2_optimal <- subset(d2test, d2test$Alpha == 0.25 & d2test$LF == 0.25 & d2test$EGS== 0 & d2test$ANS==0.2 & d2test$Bias == 10)
+plot(d2_optimal$D2, d2_optimal$Incon_RT)
+
+plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.490,0.520))
+points(d2_optimal$D2, d2_optimal$Incon_RT, pch=21, bg="black")
+lines(d1_optimal$D1, d1_optimal$Incon_RT, type="l", lty=2)
+points(d1_optimal$D1, d1_optimal$Incon_RT, , pch=21, bg="white")
+
+
+# Different version of "optimal"
+d1_optimal <- subset(d1test, d1test$Alpha %in% c(0.25, 05) & d1test$LF == 0.25 & d1test$EGS== 0 & d1test$ANS==0.2 & d1test$Bias <= 10)
+d1_optimal <- aggregate(d1_optimal[c("Incon_RT")], list(D1=d1_optimal$D1), mean)
+d2_optimal <- subset(d2test, d2test$Alpha %in% c(0.25, 05) & d2test$LF == 0.25 & d2test$EGS== 0 & d2test$ANS==0.2 & d2test$Bias <= 10)
+d2_optimal <- aggregate(d2_optimal[c("Incon_RT")], list(D2=d2_optimal$D2), mean)
+
+
+
+plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.490,0.520))
+points(d2_optimal$D2, d2_optimal$Incon_RT, pch=21, bg="black")
+lines(d1_optimal$D1, d1_optimal$Incon_RT, type="l", lty=2)
+points(d1_optimal$D1, d1_optimal$Incon_RT, , pch=21, bg="white")
