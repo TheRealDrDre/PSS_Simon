@@ -155,7 +155,7 @@
 
 (defun simulate-psp (n out &key (alpha 0.4) (lf 0.2))
   "Grid search of parameter space"
-  (dolist (egs (seq 0 1.1 2/10))
+  (dolist (egs (seq 0 0.21 5/100))
     (dolist (ans (seq 0.2 1.1 2/10))
       (dolist (bias (seq 1 11 1))
 	(let ((params `((:alpha ,alpha)
@@ -165,7 +165,7 @@
 	  ;(print params)
 	  (setf *bias* bias)
 	  (setf *d1* 1 *d2* 1)
-	  (dolist (d1 (seq 0.25 2.1 0.25))
+	  (dolist (d1 (seq 0.5 1.51 0.125))
 	    (setf *d1* d1)
 	    (let* ((res (simulate n :params params :report t))
 		   (row (append (param-values)
@@ -174,7 +174,7 @@
 	      (finish-output)))
 
 	  (setf *d1* 1 *d2* 1)
-	  (dolist (d2 (seq 0.25 2.1 0.25))
+	  (dolist (d2 (seq 0.5 1.51 0.125))
 	    (setf *d2* d2)
 	    (let* ((res (simulate n :params params :report t))
 		   (row (append (param-values)
