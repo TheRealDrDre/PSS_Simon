@@ -1,8 +1,6 @@
 # Damn
 
-
-
-test <- read.table('grid-sims1/final.txt', header=F, sep=",")
+test <- read.table('grid-sims2/final.txt', header=F, sep=",")
 names(test) <- c("Alpha", "LF", "EGS", "ANS", "Bias", "D1", "D2", "Con_ACC", "Con_RT", "Incon_ACC", "Incon_RT")
 
 target <- c(0.98, 0.88, 0.421, 0.489)  # Target data
@@ -81,12 +79,21 @@ plot.multid <- function() {
   text(x=x, y = rep(1.1, 7), labels = names(test)[1:7])
 }
 
-d <- round(tapply(test$Con_ACC, test$Pattern, length) / 135000, 4)
-pie(d)
 
 s1 <- tapply(test$Pattern, list(EGS = test$EGS, LF = test$LF, ANS=test$ANS), median)
 s2 <- tapply(test$Pattern, list(Alpha = test$Alpha, Bias = test$Bias), median)
 s3 <- tapply(test$Pattern, list(D1 = test$D1, D2  = test$D2), median)
+
+# Final stats for PSP
+# -------------------
+
+equal <- subset(test, test$D1 == 1 & test$D2 == 1)
+psp <- tapply(equal$Con_RT, equal$Pattern, length)
+psp <- psp /  (dim(equal)[1])
+
+rpsp <- round(psp*100, 1)
+pie(rpsp, labels = paste(c("I < C, I > C", "I < C, I = C", "I < C, I < C"), rpsp, "%"), col=grey(3:1/3))
+
 
 # Model flexbility graph
 
@@ -111,7 +118,7 @@ for (i in x) {
 m[m<1] <- 0
 
 image(m, col=jet.colors(20))
-points(x=target[3], y=target[4], col="white", lwd=2, pch=3)
+points(x=target[3], y=target[4], col="white", lwd=2, pch=4)
 grid()
 title(main="Model Flexibility: Response Times", xlab="Congruent trials (secs)", ylab="Incongruent trials (secs)")
 box(bty="o")
@@ -120,14 +127,15 @@ box(bty="o")
 # Greyscale version
 # -----------------
 image(m, col=grey(20:5/20))
-points(x=target[3], y=target[4], col="red", lwd=2, pch=3)
+points(x=target[3], y=target[4], col="red", lwd=2, pch=4)
 grid()
 title(main="Model Flexibility: Response Times", xlab="Congruent trials (secs)", ylab="Incongruent trials (secs)")
 box(bty="o")
 
 
 # Better Greyscale version
-# -----------------
+# ------------------------
+
 levelplot(m, col.regions=gray(20:1/20))
 points(x=target[3], y=target[4], col="red", lwd=2, pch=3)
 grid()
@@ -164,9 +172,9 @@ box(bty="o")
 
 # Greyscale version
 # -----------------
-image(macc, col=grey(20:5/20))
+image(macc[50:100, 50:100], col=grey(20:5/20))
 grid()
-points(x=target[1], y=target[2], col="red", lwd=2, pch=3)
+points(x=target[1], y=target[2], col="red", lwd=2, pch=4)
 title(main="Model Flexibility: Accuracy", xlab="Congruent trials (secs)", ylab="Incongruent trials (secs)")
 box(bty="o")
 
@@ -193,8 +201,8 @@ error <- function(a, b, c, d) {
 
 verror <- Vectorize(error)
 
-test$Error <- verror(test$Con_ACC, test$Incon_ACC,
-                     test$Con_RT, test$Incon_RT)
+equal$Error <- verror(equal$Con_ACC, equal$Incon_ACC,
+                      equal$Con_RT, equal$Incon_RT)
 
 
 error2 <- function(a, b, c, d) {
@@ -212,24 +220,26 @@ error2 <- function(a, b, c, d) {
 
 verror2 <- Vectorize(error2)
 
-test$Error2 <- verror2(test$Con_ACC, test$Incon_ACC,
-                     test$Con_RT, test$Incon_RT)
+equal$Error2 <- verror2(equal$Con_ACC, equal$Incon_ACC,
+                        equal$Con_RT, equal$Incon_RT)
 
 
-plot(test$Con_ACC, test$Incon_ACC, xlim=c(0,1), ylim=c(0,1))
-plot(test$Con_RT, test$Incon_RT, xlim=c(0,1), ylim=c(0,1))
+#plot(test$Con_ACC, test$Incon_ACC, xlim=c(0,1), ylim=c(0,1))
+#plot(test$Con_RT, test$Incon_RT, xlim=c(0,1), ylim=c(0,1))
 
-equal <- subset(test, test$D1==1 & test$D2==1)
 
-plot(equal$Con_ACC, equal$Incon_ACC, xlim=c(0,1), ylim=c(0,1), col="#33333399")
-points(x=c(0.98), y=c(0.88), col="red", pch=3)
-plot(equal$Con_RT, equal$Incon_RT, xlim=c(0,1), ylim=c(0,1), col="#33333399")
-points(x=c(0.421), y=c(0.489), col="red", pch=3)
+#plot(equal$Con_ACC, equal$Incon_ACC, xlim=c(0,1), ylim=c(0,1), col="#33333399")
+##points(x=c(0.98), y=c(0.88), col="red", pch=3)
+#plot(equal$Con_RT, equal$Incon_RT, xlim=c(0,1), ylim=c(0,1), col="#33333399")
+#points(x=c(0.421), y=c(0.489), col="red", pch=3)
+
 subset(equal, equal$Error2 == min(equal$Error2))
 
 ## --------------------------------------------------------------- ##
 ## CORRELATIONS
 ## --------------------------------------------------------------- ##
+
+cor.target = c()
 
 nd1 <- length(unique(test$D1))
 nd2 <- length(unique(test$D2))
@@ -321,18 +331,37 @@ plot(d2_optimal$D2, d2_optimal$Incon_RT)
 plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.490,0.520))
 points(d2_optimal$D2, d2_optimal$Incon_RT, pch=21, bg="black")
 lines(d1_optimal$D1, d1_optimal$Incon_RT, type="l", lty=2)
-points(d1_optimal$D1, d1_optimal$Incon_RT, , pch=21, bg="white")
+points(d1_optimal$D1, d1_optimal$Incon_RT, pch=21, bg="white")
 
 
 # Different version of "optimal"
-d1_optimal <- subset(d1test, d1test$Alpha %in% c(0.25, 0.5) & d1test$LF %in% c(0.25, 0.5) & d1test$EGS== 0 & d1test$ANS==0.2 & d1test$Bias <= 10)
-d1_optimal <- aggregate(d1_optimal[c("Incon_RT")], list(D1=d1_optimal$D1), mean)
-d2_optimal <- subset(d2test, d2test$Alpha %in% c(0.25, 0.5) & d2test$LF %in% c(0.25, 0.5) & d2test$EGS== 0 & d2test$ANS==0.2 & d2test$Bias <= 10)
-d2_optimal <- aggregate(d2_optimal[c("Incon_RT")], list(D2=d2_optimal$D2), mean)
+d1_optimal <- subset(d1test, d1test$Alpha <= 1 & d1test$LF <= 0.6 & d1test$EGS<= 0.2 & d1test$ANS<=0.4 & d1test$Bias <= 10)
+d1_optimal <- aggregate(d1_optimal[c("Incon_RT", "Con_RT")], list(D1=d1_optimal$D1), mean)
+d2_optimal <- subset(d2test, d2test$Alpha <= 1 & d2test$LF <= 0.6 & d2test$EGS<= 0.2 & d2test$ANS<=0.4 & d2test$Bias <= 10)
+d2_optimal <- aggregate(d2_optimal[c("Incon_RT", "Con_RT")], list(D2=d2_optimal$D2), mean)
 
 
-
-plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.450,0.550))
+plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.45,0.570))
 points(d2_optimal$D2, d2_optimal$Incon_RT, pch=21, bg="black")
 lines(d1_optimal$D1, d1_optimal$Incon_RT, type="l", lty=2)
-points(d1_optimal$D1, d1_optimal$Incon_RT, , pch=21, bg="white")
+points(d1_optimal$D1, d1_optimal$Incon_RT, pch=21, bg="white")
+
+
+plot(d2_optimal$D2, d2_optimal$Con_RT, type="l", ylim = c(0,2))
+points(d2_optimal$D2, d2_optimal$Con_RT, pch=21, bg="black")
+lines(d1_optimal$D1, d1_optimal$Con_RT, type="l", lty=2)
+points(d1_optimal$D1, d1_optimal$Con_RT, pch=21, bg="white")
+
+
+# 
+
+zd1 <- subset(d1test, d1test$EGS == 0.0)
+zd2 <- subset(d2test, d2test$EGS == 0.0)
+
+
+azd1 <- aggregate(zd1[c("Con_RT", "Incon_RT")], list(D1=zd1$D1), mean)
+azd2 <- aggregate(zd2[c("Con_RT", "Incon_RT")], list(D2=zd2$D2), mean)
+
+plot(azd2$D2, azd2$Incon_RT, type="l", ylim = c(0.50,0.6))
+points(azd2$D2, azd2$Incon_RT, pch=21, bg="black")
+
