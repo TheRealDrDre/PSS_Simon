@@ -328,7 +328,7 @@
 ;;; -------------------------------------------------------------- ;;;
 
 ;;; Enabled for sims #3
-(spp check-pass :reward 1)
+;(spp check-pass :reward 1)
 
 ; Standard versions 
 (spp check-detect-problem :reward -1)
