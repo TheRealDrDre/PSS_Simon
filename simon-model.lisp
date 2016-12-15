@@ -332,8 +332,6 @@
 
 ; Standard versions 
 (spp check-detect-problem :reward -1)
-;(spp process-shape :u 1 :fixed-utility t)
-;(spp process-location :u 0.7 :fixed-utility t)
 
 (spp-fct `((process-shape :u ,*bias*)))
 (spp-fct `((process-location :u ,*bias*)))
