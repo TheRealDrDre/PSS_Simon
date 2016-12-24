@@ -348,16 +348,16 @@ d1test <- subset(test, test$Cond == "D1")
 d2test <- subset(test, test$Cond == "D2")
 
 
-d1_optimal <- subset(d1test, d1test$Alpha == 0.3 & d1test$LF == 0.25 & d1test$EGS== 0.1 & d1test$ANS==0.2 & d1test$Bias == 10)
+d1_optimal <- subset(d1test, d1test$Alpha == 0.3 & d1test$LF == 0.25 & d1test$EGS== 0.0 & d1test$ANS==0.2 & d1test$Bias == 10)
 plot(d1_optimal$D1, d1_optimal$Incon_RT)
 
-d2_optimal <- subset(d2test, d2test$Alpha == 0.3 & d2test$LF == 0.25 & d2test$EGS== 0.1 & d2test$ANS==0.2 & d2test$Bias ==10)
+d2_optimal <- subset(d2test, d2test$Alpha == 0.3 & d2test$LF == 0.25 & d2test$EGS== 0.0 & d2test$ANS==0.2 & d2test$Bias ==10)
 plot(d2_optimal$D2, d2_optimal$Incon_RT)
 
 
 
 plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.450,0.52))
-points(d2_optimal$D2, d2_optimal$Incon_RT, pch=21, bg="black")
+points(d2_optimal$D2, d2_optimal$Incon_RT, pch=21, bg="black", col="white")
 lines(d1_optimal$D1, d1_optimal$Incon_RT, type="l", lty=2)
 points(d1_optimal$D1, d1_optimal$Incon_RT, pch=21, bg="white")
 
@@ -380,25 +380,41 @@ lines(d1_optimal$D1, d1_optimal$Con_RT, type="l", lty=2)
 points(d1_optimal$D1, d1_optimal$Con_RT, pch=21, bg="white")
 grid()
 
+cor.plot <- function(y1, y2) {
+  x <- seq(0.5, 1.5, 0.125)
+  
+  plot.new()
+  plot.window(c(0.4, 1.6), c(440, 500))
+  axis(1, at = seq(0.5, 1.5, 0.25))
+  axis(2, at = seq(440, 500, 10))
+  #grid()
+  
+  lines(x, y1, type="l", lty=1, col="grey35")
+  points(x, y1, pch=21, bg="grey35", cex=1.5, col="grey35")
+  m <- lm(y1 ~ x)
+  abline(m$coefficients[1], m$coefficients[2], col="grey25", lty=3, lwd=2)
+  
+  lines(x, y2, type="l", lty=1, col="grey75")
+  points(x, y2, pch=21, bg="grey75", cex=1.5, col="grey75")
+  m <- lm(y2 ~ x)
+  abline(m$coefficients[1], m$coefficients[2], col="grey55", lty=3, lwd=2)
+  box(bty="o")
+  
+  legend(x="topright", legend=c("Congruent", "Incongruent"), 
+         pch=21, lty=1, bty="n", pt.bg =c("grey75", "grey35"), col =c("grey75", "grey35"))
+}
+
 cor.plots <- function() {
   layout(matrix(c(1,2), ncol=2))
-  plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.440,0.5))
-  points(d2_optimal$D2, d2_optimal$Incon_RT, pch=21, bg="black")
-  m <- lm(d2_optimal$Incon_RT ~ d2_optimal$D2)
-  abline(m$coefficients[1], m$coefficients[2], col="grey25", lty=2)
+  cor.plot(d1_optimal$Incon_RT*1000, d1_optimal$Con_RT*1000)
+  title(xlab=expression(italic(d)[1]), ylab = "Response times (ms)",
+        main=expression(bold(paste("(A) Effects of ", italic(d)[1], " on Simon Task"))))
   
-  lines(d2_optimal$D2, d2_optimal$Con_RT, col="grey")
-  points(d2_optimal$D2, d2_optimal$Con_RT, pch=21, bg="grey")
-  m <- lm(d2_optimal$Con_RT ~ d2_optimal$D2)
-  abline(m$coefficients[1], m$coefficients[2], col="grey75", lty=2)
   
-  grid()
+  cor.plot(d2_optimal$Incon_RT*1000, d2_optimal$Con_RT*1000)
+  title(xlab=expression(italic(d)[2]), ylab = "Response times (ms)",
+        main=expression(bold(paste("(B) Effects of ", italic(d)[2], " on Simon Task"))))
   
-  plot(d1_optimal$D1, d1_optimal$Incon_RT, type="l", ylim = c(0.440,0.5))
-  points(d1_optimal$D1, d1_optimal$Incon_RT, pch=21, bg="black")
-  lines(d1_optimal$D1, d1_optimal$Con_RT, type="l", lty=2)
-  points(d1_optimal$D1, d1_optimal$Con_RT, pch=21, bg="white")
-  grid()
 }
   
 # Different version of "optimal"
@@ -423,13 +439,20 @@ points(d1_optimal$D1, d1_optimal$Con_RT, pch=21, bg="white")
 # For sims4
 
 # Different version of "optimal"
-d1_optimal <- subset(d1test, d1test$LF <= 1 & d1test$ANS<=1 & d1test$Bias <= 10)
+d1_optimal <- subset(d1test, d1test$Alpha == 0.3 & d1test$LF == 0.25 & d1test$EGS<= 0.2 & d1test$ANS==0.2 & d1test$Bias == 10)
 d1_optimal <- aggregate(d1_optimal[c("Incon_RT", "Con_RT")], list(D1=d1_optimal$D1), mean)
-d2_optimal <- subset(d2test, d2test$LF <= 1 & d2test$ANS<=1 & d2test$Bias <= 10)
+d2_optimal <- subset(d2test, d2test$Alpha == 0.3 & d2test$LF == 0.25 & d2test$EGS<= 0.2 & d2test$ANS==0.2 & d2test$Bias == 10)
 d2_optimal <- aggregate(d2_optimal[c("Incon_RT", "Con_RT")], list(D2=d2_optimal$D2), mean)
 
 
-plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.55, 0.6), xlim=c(0.5,1.5))
+# Acrosso all!
+d1_optimal <- subset(d1test, d1test$Alpha == 0.3 & d1test$LF == 0.25 & d1test$EGS<= 0.2 & d1test$ANS==0.2 & d1test$Bias == 10)
+d1_optimal <- aggregate(d1_optimal[c("Incon_RT", "Con_RT")], list(D1=d1_optimal$D1), mean)
+d2_optimal <- subset(d2test, d2test$Alpha == 0.3 & d2test$LF == 0.25 & d2test$EGS<= 0.2 & d2test$ANS==0.2 & d2test$Bias == 10)
+d2_optimal <- aggregate(d2_optimal[c("Incon_RT", "Con_RT")], list(D2=d2_optimal$D2), mean)
+
+
+plot(d2_optimal$D2, d2_optimal$Incon_RT, type="l", ylim = c(0.44, 0.51), xlim=c(0.5,1.5))
 points(d2_optimal$D2, d2_optimal$Incon_RT, pch=21, bg="black")
 lines(d1_optimal$D1, d1_optimal$Incon_RT, type="l", lty=2)
 points(d1_optimal$D1, d1_optimal$Incon_RT, pch=21, bg="white")
