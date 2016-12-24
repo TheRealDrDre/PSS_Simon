@@ -2,7 +2,8 @@
 library(Rmisc)
 library(matlab)
 library(pwr)
-test <- read.table('grid-sims4/final.txt', header=F, sep=",")
+#test <- read.table('grid-sims4/final.txt', header=F, sep=",")
+test <- read.table('grid-sims/final.txt', header=F, sep=",")
 names(test) <- c("Alpha", "LF", "EGS", "ANS", "Bias", "D1", "D2", "Con_ACC", "Con_RT", "Incon_ACC", "Incon_RT")
 test$SimonEffect <- test$Incon_RT - test$Con_RT
 
