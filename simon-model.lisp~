@@ -15,17 +15,6 @@
 ;;; solution is simple, intutitive, and permits to model competitive
 ;;; dynamics of the BG without changing ACT-R.
 ;;; ================================================================
-;;;
-;;; How to run this model:
-;;; ----------------------
-;;;
-;;;   1. Open a Lisp interpreter and load ACT-R;
-;;;   2. Load the "simon-device.lisp" file first.
-;;;      (if you want to run simulations, also load the
-;;;      "simon-simulations.lisp" file);
-;;;   3. Load this file.
-;;;   4. Run the model using ACT-R commands.
-;;; ------------------------------------------------------------------
 
 (clear-all)
 
