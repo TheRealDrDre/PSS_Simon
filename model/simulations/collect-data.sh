@@ -2,5 +2,5 @@
 
 rm final.txt
 for i in *.txt; do 
-    cat $i >> final.txt; 
+    cat $i >> simulations.txt; 
 done

@@ -305,7 +305,7 @@ target[3:4] <- target[3:4]/1000   # Format RTs in ACT-R units (seconds)
 
 ## 3.2 Load the model simulations
 ## ------------------------------------------------------------------
-test <- read.table('model/grid-sims/final.txt', header=F, sep=",")
+test <- read.table('model/simulations/simulations.txt', header=F, sep=",")
 names(test) <- c("Alpha", "LF", "EGS", "ANS", "Bias", "D1", "D2", "Con_ACC", "Con_RT", "Incon_ACC", "Incon_RT")
 test$SimonEffect <- test$Incon_RT - test$Con_RT
 
@@ -470,10 +470,6 @@ space$r_D2_Inc[is.na(space$r_D2_Inc)] <- 0
 space$r_D2_Eff[is.na(space$r_D2_Eff)] <- 0
 
 
-space$diff_d2_r <- space$r_D2_Inc - space$r_D2_Con
-space$diff_d2_r[is.na(space$diff_d2_r)] <- 0
-
-
 # Re-instantiate the correct, non-approx values for d1test and d2test
 d1test <- subset(test, test$Cond == "D1")
 d2test <- subset(test, test$Cond == "D2")
@@ -484,8 +480,6 @@ d1_optimal <- subset(d1test, d1test$Alpha == 0.3 & d1test$LF == 0.25 & d1test$EG
 d1_optimal <- aggregate(d1_optimal[c("Incon_RT", "Con_RT")], list(D1=d1_optimal$D1), mean)
 d2_optimal <- subset(d2test, d2test$Alpha == 0.3 & d2test$LF == 0.25 & d2test$EGS<= 0.2 & d2test$ANS==0.2 & d2test$Bias >= 1)
 d2_optimal <- aggregate(d2_optimal[c("Incon_RT", "Con_RT")], list(D2=d2_optimal$D2), mean)
-
-
 
 ## ------------------------------------------------------------------
 ## 4. GRAPHICS OF MODEL FIT (Figures 7 and 8 in the paper)
@@ -552,7 +546,13 @@ cor.plot <- function(y1, y2) {
 
 
 figure8 <- function() {
-  layout(matrix(c(1,2), ncol=2))
+  layout(mat = matrix(c(1, 1, 2, 3), nrow = 2, byrow=T),
+         widths=c(1, 1), heights=c(1/10, 1))
+  
+  par(mar=c(0,4,0,2))
+  plot.new()
+  
+  par(mar=c(2,4,2,2))
   cor.plot(d1_optimal$Incon_RT*1000, d1_optimal$Con_RT * 1000)
   title(xlab=expression(italic(d)[1]), ylab = "Response times (ms)",
         main=expression(bold(paste("(A) Effects of ", italic(d)[1], " on Simon Task"))))
@@ -643,11 +643,19 @@ rcpsp <- round(100 * cpsp / sum(c(cpsp)), 1)
 
 
 figure9 <- function() {
-  layout(matrix(c(1,2), ncol=2))
+  layout(mat = matrix(c(1, 1, 2, 3), nrow = 2, byrow=T),
+         widths=c(1, 1), heights=c(1/10, 1))
+  
+  par(mar=c(0,4,0,2))
+  plot.new()
+  text("Parameter Space Partitioning", x=0.5, y=1, adj=c(0.5,1), cex=1.5)
+  
+  
+  par(mar=c(2,4,2,2))
   pie(rpsp, col=rev(grey.colors(3)), labels = c("Correct\npattern\n(99.8%)", "", ""), border=NA, edges=2000, radius=1, lwd=2)
-  title(main="(A) PSP: Group averages")
+  title(main="(A) Group averages")
   
   pie(rcpsp, col=rev(grey.colors(9)), border="white", edges = 2000, radius = 1,
       labels = c("Correct\npattern\n(76.0%)", rep("", 8)))
-  title(main="(B) PSP: Correlations with PSS")
+  title(main="(B) Correlations with PSS")
 }
