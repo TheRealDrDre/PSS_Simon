@@ -312,7 +312,7 @@
 
  
 (p respond
-   "If we have a response and it has been check, we respond"
+   "If we have a response and it has been checked, we respond"
    =visual>
      kind simon-stimulus
      shape =SHAPE 
