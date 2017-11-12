@@ -149,7 +149,7 @@ paired.r(xy=cor(data$AvoidB_ACC, data$CongruencyEffect_SimonRT),
 ## 2. BEHAVIORAL GRAPHICS (Figures 4 and 5 in the paper)
 ## ------------------------------------------------------------------
 
-plot.correlation <- function(thedata=data, xvar="ChooseA_ACC", yvar="Pre_Incongruent_SimonRT", 
+plot.correlation <- function(thedata=data, xvar="ChooseA_ACC", yvar="Incongruent_SimonRT", 
                              xlab="", ylab="", corpos=c(0.2, 0.2), xlim=c(0, 1), ...) {
   #par(mar=c(4,4,3,2))
   attach(thedata)
@@ -306,6 +306,8 @@ target[3:4] <- target[3:4]/1000   # Format RTs in ACT-R units (seconds)
 ## 3.2 Load the model simulations
 ## ------------------------------------------------------------------
 test <- read.table('model/simulations/simulations.txt', header=F, sep=",")
+# For the "short device" version, load this one instead
+#test <- read.table('model/simulations-short/final.txt', header=F, sep=",")
 names(test) <- c("Alpha", "LF", "EGS", "ANS", "Bias", "D1", "D2", "Con_ACC", "Con_RT", "Incon_ACC", "Incon_RT")
 test$SimonEffect <- test$Incon_RT - test$Con_RT
 
@@ -476,9 +478,9 @@ d2test <- subset(test, test$Cond == "D2")
 
 ## To get stable estimates, we need to fix the parameters to their best values
 
-d1_optimal <- subset(d1test, d1test$Alpha == 0.3 & d1test$LF == 0.25 & d1test$EGS<= 0.2 & d1test$ANS==0.2 & d1test$Bias >= 1)
+d1_optimal <- subset(d1test, d1test$Alpha == 0.5 & d1test$LF == 0.25 & d1test$EGS<= 0.2 & d1test$ANS==0.2 & d1test$Bias >= 1)
 d1_optimal <- aggregate(d1_optimal[c("Incon_RT", "Con_RT")], list(D1=d1_optimal$D1), mean)
-d2_optimal <- subset(d2test, d2test$Alpha == 0.3 & d2test$LF == 0.25 & d2test$EGS<= 0.2 & d2test$ANS==0.2 & d2test$Bias >= 1)
+d2_optimal <- subset(d2test, d2test$Alpha == 0.5 & d2test$LF == 0.25 & d2test$EGS<= 0.2 & d2test$ANS==0.2 & d2test$Bias >= 1)
 d2_optimal <- aggregate(d2_optimal[c("Incon_RT", "Con_RT")], list(D2=d2_optimal$D2), mean)
 
 ## ------------------------------------------------------------------
