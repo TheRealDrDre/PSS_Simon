@@ -1,0 +1,21 @@
+(:saved-act-r-history-data COMPETITIVE-SIMON "7.5-<internal>")
+(:SAVE-BOLD-DATA #S(BOLD-MODULE
+                    :SCALE 1.0
+                    :EXP 5
+                    :INC 2
+                    :SETTLE 40
+                    :POINT (GOAL)
+                    :V T
+                    :CMDT T
+                    :BUFFERS (IMAGINAL MANUAL PRODUCTION RETRIEVAL VISUAL
+                              VISUAL-LOCATION)
+                    :MAX-TABLE NIL
+                    :C1 6
+                    :C2 1
+                    :NEG-EXP 15
+                    :NEG-SCALE 1.0
+                    :MODE ACT-R
+                    :SAVE-DATA T
+                    :COLORS NIL
+                    :END 0))
+(:SAVE-BUFFER-TRACE (NIL NIL NIL NIL 0))
