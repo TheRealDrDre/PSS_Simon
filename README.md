@@ -33,10 +33,7 @@ of why this particular approach is preferrable, see Stocco (2018).
 
 5. Run the model using ACT-R commands, e.g. `(run 1000 :real-time t)`
 
-## Reference
-
-Experimental results and model discussion have been published in the
-following paper:
+## References
 
 Stocco, A., Murray, N. L., Yamasaki, B. L., Renno, T. J., Nguyen, J.,
 & Prat, C. S. (2017). Individual differences in the Simon effect are
@@ -44,3 +41,6 @@ underpinned by differences in the  competitive dynamics in the basal
 ganglia: An experimental verification and a computational
 model. _Cognition_, _164_, 31-45.
 
+Stocco, A. (2018). A Biologically Plausible Action Selection System
+for Cognitive Architectures: Implications of Basal Ganglia Anatomy for
+Learning and Decision‐Making Models. _Cognitive Science_.
