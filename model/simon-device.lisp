@@ -225,7 +225,7 @@
   (:documentation "A manager for the PSS task"))
 
 (defmethod init ((task simon-task))
-  "Initializes the PSS task manager"
+  "Initializes the Simon task manager"
   (unless (null (trials task))
     (setf (index task) 0)
     (setf (experiment-log task) nil)
